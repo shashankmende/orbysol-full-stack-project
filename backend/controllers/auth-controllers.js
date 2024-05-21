@@ -17,21 +17,33 @@ const home = async (req,res)=>{
 
 const register = async(req,res)=>{
     try{
-        // const {clinicName,deviceName,enrollmentType} = req.body
+        const {
+            clinicData,
+            patientDetails,
+            addressDetails,
+            orderingData
+        } = req.body
+        const {clinicName,deviceName,enrollmentType} =clinicData
+        await Clinic.create({clinicName,deviceName,enrollmentType})
         
-        // await Clinic.create({clinicName,deviceName,enrollmentType})
-        
-        // res.status(201).send('user details obtained successfuly')
-        // console.log("request body",req.body)
-        // const {lastName,firstName,middleName,dob,gender,pacemaker,icd} = req.body
-        // await Patients.create({lastName,firstName,middleName,dob,gender,pacemaker,icd})
        
-        // res.status(201).send("patient details recieved successfully")
-    // const {address1,address2,city,state,primaryPhone,secondaryPhone,zip} = req.body
-    // await Address.create({address1,address2,city,state,primaryPhone,secondaryPhone,zip})
-    // res.status(201).send("Address  recieved successfully")
+        const {name} = patientDetails
+        const {firstName,lastName,middleName} = name
+        const {dob,gender,pacemaker,icd} = patientDetails
+        const newDate =new Date(dob)
+const dateOnly = new Date(newDate.getFullYear(), newDate.getMonth(), newDate.getDate());
 
-    const {orderProvider,readingProvider,referringProvider} = req.body
+
+        await Patients.create({lastName,firstName,middleName,dob:dateOnly.toLocaleDateString(),gender,pacemaker,icd})
+       
+        
+        const {address,primaryPhone,secondaryPhone} = addressDetails
+        const {address1,address2} = address
+    const {city,state,zip} = addressDetails
+    await Address.create({address1,address2,city,state,primaryPhone,secondaryPhone,zip})
+    
+
+    const {orderProvider,readingProvider,referringProvider} = orderingData
         await Provider.create({orderProvider,readingProvider,referringProvider})
 
     }
@@ -42,5 +54,23 @@ const register = async(req,res)=>{
     }
 }
 
+const getDetails = async(req,res)=>{
+    console.log('we are in this page http://localhost:3000/api/auth/details')
+    const clinicRsponse = await Clinic.find()
+    
+    
+    const patientsResponse = await Patients.find()
+   const addressResponse =  await Address.find()
+    const providerResponse = await Provider.find()
+    const details = { clinic:clinicRsponse,
+        patients: patientsResponse,
+        address: addressResponse,
+        provider: providerResponse
+     }
+
+     res.send(details)
+}
+
 module.exports.home = home
 module.exports.register = register
+module.exports.getDetails = getDetails

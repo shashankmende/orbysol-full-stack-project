@@ -18,4 +18,6 @@ router.route('/').get(authController.home)
 
 router.route('/register').post(authController.register)
 
+router.route('/details').get(authController.getDetails)
+
 module.exports = router
